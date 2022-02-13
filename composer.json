@@ -1,5 +1,5 @@
 {
-    "name": "phprtc/utils",
+    "name": "phprtc/websocket",
     "description": "PHP RTC utility library",
     "type": "library",
     "license": "MIT",
