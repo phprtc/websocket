@@ -1,0 +1,28 @@
+{
+    "name": "phprtc/utils",
+    "description": "PHP RTC utility library",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ahmard",
+            "email": "ahmardy@outlook.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "phprtc/contracts": "dev-master",
+        "phprtc/server": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "RTC\\Utils\\": "src/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://phprtc.repo.repman.io"
+        }
+    ]
+}
