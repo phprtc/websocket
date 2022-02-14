@@ -28,7 +28,7 @@ class Frame implements FrameInterface
     public function getMessage(): array
     {
         if (!isset($this->decodedMessage)) {
-            $this->decodedMessage = json_decode($this->frame->data, JSON_OBJECT_AS_ARRAY);
+            $this->decodedMessage = json_decode($this->frame->data, true);
         }
 
         return $this->decodedMessage;

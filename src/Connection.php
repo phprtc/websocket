@@ -24,13 +24,15 @@ class Connection implements ConnectionInterface
         int    $flags = SWOOLE_WEBSOCKET_FLAG_FIN
     ): void
     {
-        $data = [
-            'command' => $command,
-            'data' => $data,
-            'time' => time()
-        ];
+        if ($this->server->exists($this->getIdentifier())) {
+            $data = [
+                'command' => $command,
+                'data' => $data,
+                'time' => time()
+            ];
 
-        $this->server->push($this->fd, json_encode($data), $opcode, $flags);
+            $this->server->push($this->fd, (string)json_encode($data), $opcode, $flags);
+        }
     }
 
     /**
