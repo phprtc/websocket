@@ -3,6 +3,7 @@
 namespace RTC\Websocket;
 
 use RTC\Contracts\Websocket\FrameInterface;
+use RTC\Contracts\Websocket\PayloadInterface;
 
 class Frame implements FrameInterface
 {
@@ -11,34 +12,38 @@ class Frame implements FrameInterface
 
     public function __construct(protected \Swoole\WebSocket\Frame $frame)
     {
-
+        $this->decodedMessage = json_decode($this->frame->data, true);
     }
 
     /**
      * @inheritDoc
      */
-    public function getFrame(): \Swoole\WebSocket\Frame
+    public function getCommand(): string|null
     {
-        return $this->frame;
+        return $this->decodedMessage['command'] ?? null;
     }
 
     /**
      * @inheritDoc
      */
-    public function getMessage(): array
+    public function getMessage(): mixed
     {
-        if (!isset($this->decodedMessage)) {
-            $this->decodedMessage = json_decode($this->frame->data, true);
-        }
-
-        return $this->decodedMessage;
+        return $this->decodedMessage['message'] ?? null;
     }
 
     /**
      * @inheritDoc
      */
-    public function getRawMessage(): string
+    public function getTime(): string|null
     {
-        return $this->frame->data;
+        return $this->decodedMessage['time'] ?? null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPayload(): PayloadInterface
+    {
+        return new Payload($this->frame);
     }
 }

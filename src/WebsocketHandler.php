@@ -2,6 +2,7 @@
 
 namespace RTC\Websocket;
 
+use JetBrains\PhpStorm\Pure;
 use RTC\Contracts\Websocket\ConnectionInterface;
 use RTC\Contracts\Websocket\WebsocketHandlerInterface;
 use RTC\Server\Server;
@@ -17,19 +18,21 @@ abstract class WebsocketHandler implements WebsocketHandlerInterface
     )
     {
         $this->connections = new Table($size);
-        $this->connections->column('path', Table::TYPE_INT, 100);
+        $this->connections->column('conn', Table::TYPE_INT, 100);
         $this->connections->create();
     }
 
     public function addConnection(ConnectionInterface $connection): void
     {
-        $this->connections->set($connection->getIdentifier(), ['path' => $connection->getIdentifier()]);
+        $this->connections->set((string)$connection->getIdentifier(), ['conn' => $connection->getIdentifier()]);
     }
 
-    public function getConnection(int $fd): ?ConnectionInterface
+    #[Pure] public function getConnection(int $fd): ?ConnectionInterface
     {
-        foreach ($this->connections as $connFD => $connection) {
-            if ($fd == $connFD) return $connection;
+        foreach ($this->connections as $connectionData) {
+            if ($fd == $connectionData['conn']) {
+                return new Connection($this->server, $fd);
+            }
         }
 
         return null;
