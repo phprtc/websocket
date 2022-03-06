@@ -6,13 +6,13 @@ use RTC\Contracts\Websocket\KernelInterface;
 
 class Kernel implements KernelInterface
 {
-    protected array $kernels = [];
+    protected array $handlers = [];
 
     /**
      * @inheritDoc
      */
     public function getHandlers(): array
     {
-        return $this->kernels;
+        return $this->handlers;
     }
 }
