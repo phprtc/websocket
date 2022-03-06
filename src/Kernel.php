@@ -15,4 +15,9 @@ class Kernel implements KernelInterface
     {
         return $this->handlers;
     }
+
+    public function hasHandlers(): bool
+    {
+        return !empty($this->handlers);
+    }
 }
