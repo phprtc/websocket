@@ -7,12 +7,18 @@ use RTC\Contracts\Websocket\PayloadInterface;
 
 class Frame implements FrameInterface
 {
-    protected array $decodedMessage;
+    protected array|string $decodedMessage;
 
 
     public function __construct(protected \Swoole\WebSocket\Frame $frame)
     {
-        $this->decodedMessage = json_decode($this->frame->data, true);
+        $decodedMessage = json_decode($this->frame->data, true);
+
+        if (is_array($decodedMessage)) {
+            $this->decodedMessage = $decodedMessage;
+        } else {
+            $this->decodedMessage = (string)$decodedMessage;
+        }
     }
 
     /**

@@ -7,12 +7,17 @@ use Swoole\WebSocket\Frame;
 
 class Payload implements PayloadInterface
 {
-    protected array $decodedMessage;
+    protected array $decodedMessage = [];
     protected float $serverTime;
 
     public function __construct(protected Frame $frame)
     {
-        $this->decodedMessage = json_decode($this->frame->data, true);
+        $decodedMessage = json_decode($this->frame->data, true);
+
+        if (is_array($decodedMessage)) {
+            $this->decodedMessage = $decodedMessage;
+        }
+
         $this->serverTime = microtime(true);
     }
 

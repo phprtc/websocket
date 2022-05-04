@@ -13,7 +13,8 @@
         "php": ">=8.1",
         "phprtc/contracts": "dev-master",
         "phprtc/utils": "dev-master",
-        "phprtc/server": "dev-master"
+        "phprtc/server": "dev-master",
+        "phprtc/console": "dev-main"
     },
     "autoload": {
         "psr-4": {
@@ -34,6 +35,7 @@
     "require-dev": {
         "phpstan/phpstan": "^1.4",
         "phpunit/phpunit": "^9.5",
-        "openswoole/ide-helper": "^4.10"
+        "openswoole/ide-helper": "^4.10",
+        "jetbrains/phpstorm-attributes": "^1.0"
     }
 }

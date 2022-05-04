@@ -2,14 +2,14 @@
 
 namespace RTC\Websocket;
 
+use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
-use RTC\Server\Server;
 
 class Connection implements ConnectionInterface
 {
     public function __construct(
-        protected Server $server,
-        protected int    $fd
+        protected ServerInterface $server,
+        protected int             $fd
     )
     {
     }
@@ -25,13 +25,16 @@ class Connection implements ConnectionInterface
     ): void
     {
         if ($this->server->exists($this->getIdentifier())) {
-            $data = [
-                'command' => $command,
-                'data' => $data,
-                'time' => time()
-            ];
-
-            $this->server->push($this->fd, (string)json_encode($data), $opcode, $flags);
+            $this->server->push(
+                fd: $this->fd,
+                data: (string)json_encode([
+                    'command' => $command,
+                    'data' => $data,
+                    'time' => microtime(true)
+                ]),
+                opcode: $opcode,
+                flags: $flags,
+            );
         }
     }
 
