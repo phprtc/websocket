@@ -43,7 +43,7 @@ class Room extends Event
         }
 
         $connectionId = $this->getClientId($connection);
-        $this->connections->set(key: $connectionId, value: ['conn' => $connectionId]);
+        $this->connections->set(key: $connectionId, value: ['conn' => (int)$connectionId]);
 
         // Fire client add event
         $this->emit(RoomEnum::EVENT_ON_ADD->value, [$connection]);
