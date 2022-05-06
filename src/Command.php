@@ -4,19 +4,14 @@ namespace RTC\Websocket;
 
 use RTC\Contracts\Websocket\CommandInterface;
 use RTC\Contracts\Websocket\FrameInterface;
-use Swoole\WebSocket\Frame;
 
 class Command implements CommandInterface
 {
 
     public function __construct(
-        protected Frame $frame,
-        protected array $decodedMessage = []
+        protected FrameInterface $frame
     )
     {
-        if (empty($this->decodedMessage)) {
-            $this->decodedMessage = json_decode($this->frame->data, true);
-        }
     }
 
     /**
@@ -24,7 +19,7 @@ class Command implements CommandInterface
      */
     public function getMessage(): mixed
     {
-        return $this->decodedMessage['message'] ?? null;
+        return $this->frame->getDecoded()['message'] ?? null;
     }
 
     /**
@@ -32,7 +27,7 @@ class Command implements CommandInterface
      */
     public function getCommand(): string
     {
-        return $this->decodedMessage['command'];
+        return $this->frame->getDecoded()['command'];
     }
 
     /**
@@ -40,7 +35,7 @@ class Command implements CommandInterface
      */
     public function getTime(): string
     {
-        return $this->decodedMessage['time'];
+        return $this->frame->getDecoded()['time'];
     }
 
     /**
@@ -48,6 +43,6 @@ class Command implements CommandInterface
      */
     public function getFrame(): FrameInterface
     {
-        return new \RTC\Websocket\Frame($this->frame);
+        return $this->frame;
     }
 }
