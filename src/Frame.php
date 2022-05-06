@@ -3,53 +3,50 @@
 namespace RTC\Websocket;
 
 use RTC\Contracts\Websocket\FrameInterface;
-use RTC\Contracts\Websocket\PayloadInterface;
 
 class Frame implements FrameInterface
 {
-    protected array|string $decodedMessage;
+    protected array $decodedMessage = [];
+    protected float $serverTime;
 
 
     public function __construct(protected \Swoole\WebSocket\Frame $frame, ?array $decodedMessage = null)
     {
+        $this->serverTime = microtime(true);
         $decodedMessage ??= json_decode($this->frame->data, true);
 
         if (is_array($decodedMessage)) {
             $this->decodedMessage = $decodedMessage;
-        } else {
-            $this->decodedMessage = (string)$decodedMessage;
         }
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getCommand(): string|null
+    public function getRaw(): string
     {
-        return $this->decodedMessage['command'] ?? null;
+        return $this->frame->data;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getMessage(): mixed
+    public function getDecoded(): array
     {
-        return $this->decodedMessage['message'] ?? null;
+        return $this->decodedMessage;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getTime(): string|null
+    public function getFd(): int
     {
-        return $this->decodedMessage['time'] ?? null;
+        return $this->frame->fd;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getPayload(): PayloadInterface
+    public function getOpCode(): int
     {
-        return new Payload($this->frame);
+        return $this->frame->opcode;
+    }
+
+    public function getSwooleFrame(): \Swoole\WebSocket\Frame
+    {
+        return $this->frame;
+    }
+
+    public function getServerTime(): float
+    {
+        return $this->serverTime;
     }
 }
