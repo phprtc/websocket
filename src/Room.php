@@ -101,7 +101,7 @@ class Room extends Event
                 fd: $connectionData['conn'],
                 data: (string)json_encode([
                     'command' => $command,
-                    'data' => ['message' => $message],
+                    'data' => $message,
                     'time' => microtime(true)
                 ]),
             );
