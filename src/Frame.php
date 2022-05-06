@@ -10,9 +10,9 @@ class Frame implements FrameInterface
     protected array|string $decodedMessage;
 
 
-    public function __construct(protected \Swoole\WebSocket\Frame $frame)
+    public function __construct(protected \Swoole\WebSocket\Frame $frame, ?array $decodedMessage = null)
     {
-        $decodedMessage = json_decode($this->frame->data, true);
+        $decodedMessage ??= json_decode($this->frame->data, true);
 
         if (is_array($decodedMessage)) {
             $this->decodedMessage = $decodedMessage;
