@@ -2,14 +2,13 @@
 
 namespace RTC\Websocket;
 
-use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
+use RTC\Server\Server;
 
 class Connection implements ConnectionInterface
 {
     public function __construct(
-        protected ServerInterface $server,
-        protected int             $fd
+        protected int $fd
     )
     {
     }
@@ -24,8 +23,8 @@ class Connection implements ConnectionInterface
         int    $flags = SWOOLE_WEBSOCKET_FLAG_FIN
     ): void
     {
-        if ($this->server->exists($this->getIdentifier())) {
-            $this->server->push(
+        if (Server::get()->exists($this->getIdentifier())) {
+            Server::get()->push(
                 fd: $this->fd,
                 data: (string)json_encode([
                     'command' => $command,
@@ -43,7 +42,7 @@ class Connection implements ConnectionInterface
      */
     public function close(): void
     {
-        $this->server->getServer()->close($this->fd);
+        Server::get()->getServer()->close($this->fd);
     }
 
     /**
