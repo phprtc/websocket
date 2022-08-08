@@ -14,11 +14,11 @@ abstract class WebsocketHandler implements WebsocketHandlerInterface
 
     public function __construct(
         protected readonly ServerInterface $server,
-        protected readonly int $size = 2048
+        protected readonly int             $size = 1000_000
     )
     {
         $this->connections = new Table($this->size);
-        $this->connections->column('conn', Table::TYPE_INT, 100);
+        $this->connections->column('conn', Table::TYPE_STRING, 100);
         $this->connections->create();
     }
 
@@ -28,13 +28,14 @@ abstract class WebsocketHandler implements WebsocketHandlerInterface
 
     public function addConnection(ConnectionInterface $connection): void
     {
-        $this->connections->set((string)$connection->getIdentifier(), ['conn' => $connection->getIdentifier()]);
+        $connId = strval($connection->getIdentifier());
+        $this->connections->set($connId, ['conn' => $connId]);
     }
 
     public function getConnection(int $fd): ?ConnectionInterface
     {
-        if ($this->connections->exist((string)$fd)) {
-            return new Connection($this->server, $fd);
+        if ($this->connections->exist(strval($fd))) {
+            return new Connection($fd);
         }
 
         return null;

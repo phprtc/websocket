@@ -7,7 +7,7 @@ use JetBrains\PhpStorm\Pure;
 use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
 use RTC\Server\Event;
-use RTC\Websocket\Enums\RoomEnum;
+use RTC\Websocket\Enums\RoomEventEnum;
 use RTC\Websocket\Exceptions\RoomOverflowException;
 use Swoole\Table;
 
@@ -46,7 +46,7 @@ class Room extends Event
         $this->connections->set(key: $connectionId, value: ['conn' => (int)$connectionId]);
 
         // Fire client add event
-        $this->emit(RoomEnum::EVENT_ON_ADD->value, [$connection]);
+        $this->emit(RoomEventEnum::ON_ADD->value, [$connection]);
 
         return $this;
     }
@@ -70,7 +70,7 @@ class Room extends Event
         }
 
         // Fire client remove event
-        $this->emit(RoomEnum::EVENT_ON_REMOVE->value, [$connection]);
+        $this->emit(RoomEventEnum::ON_REMOVE->value, [$connection]);
     }
 
     public function removeAll(): void
@@ -78,7 +78,7 @@ class Room extends Event
         $connections = clone $this->connections;
         $this->connections->destroy();
 
-        $this->emit(RoomEnum::EVENT_ON_REMOVE_ALL->value, [$connections]);
+        $this->emit(RoomEventEnum::ON_REMOVE_ALL->value, [$connections]);
     }
 
     public function getClients(): Table
@@ -94,7 +94,7 @@ class Room extends Event
     public function send(string $command, mixed $message): int
     {
         // Fire message event
-        $this->emit(RoomEnum::EVENT_ON_MESSAGE->value, [$command, $message]);
+        $this->emit(RoomEventEnum::ON_MESSAGE->value, [$command, $message]);
 
         foreach ($this->connections as $connectionData) {
             $this->server->push(
@@ -113,7 +113,7 @@ class Room extends Event
     public function sendAsClient(ConnectionInterface $connection, string $command, mixed $message): int
     {
         // Fire message event
-        $this->emit(RoomEnum::EVENT_ON_MESSAGE_ALL->value, [$command, $message, clone $this->connections]);
+        $this->emit(RoomEventEnum::ON_MESSAGE_ALL->value, [$command, $message, clone $this->connections]);
 
         foreach ($this->connections as $connectionData) {
             $this->server->push(
