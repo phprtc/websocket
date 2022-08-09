@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace RTC\Websocket;
 
 use JetBrains\PhpStorm\Pure;
-use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
 use RTC\Server\Event;
+use RTC\Server\Server;
 use RTC\Websocket\Enums\RoomEventEnum;
 use RTC\Websocket\Exceptions\RoomOverflowException;
 use Swoole\Table;
@@ -14,18 +14,18 @@ use Swoole\Table;
 class Room extends Event
 {
     private Table $connections;
+    private array $connMetaData = [];
 
 
-    public static function create(ServerInterface $server, string $name, int $size = -1): static
+    public static function create(string $name, int $size = -1): static
     {
-        return new static($server, $name, $size);
+        return new static($name, $size);
     }
 
 
     public function __construct(
-        protected ServerInterface $server,
-        protected string          $name,
-        protected int             $size = 1024
+        protected readonly string $name,
+        protected readonly int    $size = 1024
     )
     {
         $this->connections = new Table($this->size);
@@ -36,7 +36,7 @@ class Room extends Event
     /**
      * @throws RoomOverflowException
      */
-    public function add(int|ConnectionInterface $connection): static
+    public function add(int|ConnectionInterface $connection, array $metaData = []): static
     {
         if (-1 != $this->size && $this->connections->count() == $this->size) {
             throw new RoomOverflowException("The maximum size of $this->size for room $this->name has been reached.");
@@ -44,6 +44,11 @@ class Room extends Event
 
         $connectionId = $this->getClientId($connection);
         $this->connections->set(key: $connectionId, value: ['conn' => (int)$connectionId]);
+
+        // Save metadata(if any)
+        if ([] != $metaData) {
+            $this->connMetaData[$connectionId] = $metaData;
+        }
 
         // Fire client add event
         $this->emit(RoomEventEnum::ON_ADD->value, [$connection]);
@@ -54,6 +59,11 @@ class Room extends Event
     public function has(int|ConnectionInterface $connection): bool
     {
         return $this->connections->exist($this->getClientId($connection));
+    }
+
+    public function getMetaData(int|ConnectionInterface $connection): ?array
+    {
+        return $this->connMetaData[$this->getClientId($connection)] ?? null;
     }
 
     public function count(): int
@@ -97,11 +107,14 @@ class Room extends Event
         $this->emit(RoomEventEnum::ON_MESSAGE->value, [$command, $message]);
 
         foreach ($this->connections as $connectionData) {
-            $this->server->push(
+            Server::get()->push(
                 fd: $connectionData['conn'],
                 data: (string)json_encode([
                     'command' => $command,
-                    'data' => $message,
+                    'data' => [
+                        'sender' => "_system",
+                        'message' => $message
+                    ],
                     'time' => microtime(true)
                 ]),
             );
@@ -116,7 +129,7 @@ class Room extends Event
         $this->emit(RoomEventEnum::ON_MESSAGE_ALL->value, [$command, $message, clone $this->connections]);
 
         foreach ($this->connections as $connectionData) {
-            $this->server->push(
+            Server::get()->push(
                 fd: $connectionData['conn'],
                 data: (string)json_encode([
                     'command' => $command,

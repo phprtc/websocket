@@ -4,13 +4,19 @@ namespace RTC\Websocket;
 
 use RTC\Contracts\Websocket\ConnectionInterface;
 use RTC\Server\Server;
+use Stringable;
 
-class Connection implements ConnectionInterface
+class Connection implements Stringable, ConnectionInterface
 {
     public function __construct(
         protected int $fd
     )
     {
+    }
+
+    public function __toString(): string
+    {
+        return strval($this->fd);
     }
 
     /**
