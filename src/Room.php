@@ -147,6 +147,6 @@ class Room extends Event
 
     #[Pure] protected function getClientId(int|ConnectionInterface $connection): string
     {
-        return (string)(is_int($connection) ? $connection : $connection->getIdentifier());
+        return strval(is_int($connection) ? $connection : $connection->getIdentifier());
     }
 }
