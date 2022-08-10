@@ -108,15 +108,15 @@ class Room extends Event
 
         foreach ($this->connections as $connectionData) {
             Server::get()->push(
-                fd: $connectionData['conn'],
-                data: (string)json_encode([
+                fd: intval($connectionData['conn']),
+                data: strval(json_encode([
                     'command' => $command,
                     'data' => [
                         'sender' => "_system",
                         'message' => $message
                     ],
                     'time' => microtime(true)
-                ]),
+                ])),
             );
         }
 
@@ -130,15 +130,15 @@ class Room extends Event
 
         foreach ($this->connections as $connectionData) {
             Server::get()->push(
-                fd: $connectionData['conn'],
-                data: (string)json_encode([
+                fd: intval($connectionData['conn']),
+                data: strval(json_encode([
                     'command' => $command,
                     'data' => [
                         'sender' => $connection,
                         'message' => $message
                     ],
                     'time' => microtime(true)
-                ]),
+                ])),
             );
         }
 
