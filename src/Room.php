@@ -25,11 +25,11 @@ class Room extends Event
 
     public function __construct(
         protected readonly string $name,
-        protected readonly int    $size = 1024
+        protected readonly int    $size = 1000_00
     )
     {
         $this->connections = new Table($this->size);
-        $this->connections->column('conn', Table::TYPE_INT, 100);
+        $this->connections->column('conn', Table::TYPE_STRING, 100);
         $this->connections->create();
     }
 
