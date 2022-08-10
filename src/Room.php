@@ -43,7 +43,7 @@ class Room extends Event
         }
 
         $connectionId = $this->getClientId($connection);
-        $this->connections->set(key: $connectionId, value: ['conn' => (int)$connectionId]);
+        $this->connections->set(key: $connectionId, value: ['conn' => $connectionId]);
 
         // Save metadata(if any)
         if ([] != $metaData) {
