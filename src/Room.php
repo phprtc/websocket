@@ -111,11 +111,11 @@ class Room extends Event
                 fd: intval($connectionData['conn']),
                 data: strval(json_encode([
                     'event' => $event,
+                    'time' => microtime(true),
                     'data' => [
-                        'sender' => "_system",
-                        'message' => $message
+                        'sender_type' => "system",
+                        'message' => $message,
                     ],
-                    'time' => microtime(true)
                 ])),
             );
         }
@@ -133,11 +133,12 @@ class Room extends Event
                 fd: intval($connectionData['conn']),
                 data: strval(json_encode([
                     'event' => $event,
+                    'time' => microtime(true),
                     'data' => [
-                        'sender' => $connection,
-                        'message' => $message
+                        'sender_type' => 'user',
+                        'sender_sid' => $connection->getIdentifier(),
+                        'message' => $message,
                     ],
-                    'time' => microtime(true)
                 ])),
             );
         }
