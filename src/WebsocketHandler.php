@@ -42,9 +42,23 @@ abstract class WebsocketHandler implements WebsocketHandlerInterface
     }
 
     /**
-     * @return Table
+     * @return ConnectionInterface[]
      */
-    public function getConnections(): Table
+    public function getConnections(): array
+    {
+        $cons = [];
+        foreach ($this->connections as $connection) {
+            $connection = $this->getConnection($connection['conn']);
+
+            if ($connection) {
+                $cons[] = $connection;
+            }
+        }
+
+        return $cons;
+    }
+
+    public function getConnectionIds(): Table
     {
         return $this->connections;
     }
