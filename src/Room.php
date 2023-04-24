@@ -97,20 +97,20 @@ class Room extends Event
     }
 
     /**
-     * @param string $command
+     * @param string $event
      * @param mixed $message
      * @return int Number of successful recipients
      */
-    public function send(string $command, mixed $message): int
+    public function send(string $event, mixed $message): int
     {
         // Fire message event
-        $this->emit(RoomEventEnum::ON_MESSAGE->value, [$command, $message]);
+        $this->emit(RoomEventEnum::ON_MESSAGE->value, [$event, $message]);
 
         foreach ($this->connections as $connectionData) {
             Server::get()->push(
                 fd: intval($connectionData['conn']),
                 data: strval(json_encode([
-                    'command' => $command,
+                    'event' => $event,
                     'data' => [
                         'sender' => "_system",
                         'message' => $message
@@ -123,16 +123,16 @@ class Room extends Event
         return $this->connections->count();
     }
 
-    public function sendAsClient(ConnectionInterface $connection, string $command, mixed $message): int
+    public function sendAsClient(ConnectionInterface $connection, string $event, mixed $message): int
     {
         // Fire message event
-        $this->emit(RoomEventEnum::ON_MESSAGE_ALL->value, [$command, $message, clone $this->connections]);
+        $this->emit(RoomEventEnum::ON_MESSAGE_ALL->value, [$event, $message, clone $this->connections]);
 
         foreach ($this->connections as $connectionData) {
             Server::get()->push(
                 fd: intval($connectionData['conn']),
                 data: strval(json_encode([
-                    'command' => $command,
+                    'event' => $event,
                     'data' => [
                         'sender' => $connection,
                         'message' => $message

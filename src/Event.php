@@ -2,10 +2,10 @@
 
 namespace RTC\Websocket;
 
-use RTC\Contracts\Websocket\CommandInterface;
+use RTC\Contracts\Websocket\EventInterface;
 use RTC\Contracts\Websocket\FrameInterface;
 
-class Command implements CommandInterface
+class Event implements EventInterface
 {
 
     public function __construct(
@@ -25,9 +25,9 @@ class Command implements CommandInterface
     /**
      * @inheritDoc
      */
-    public function getCommand(): string
+    public function getEvent(): string
     {
-        return $this->frame->getDecoded()['command'];
+        return $this->frame->getDecoded()['event'];
     }
 
     /**

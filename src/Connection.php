@@ -23,7 +23,7 @@ class Connection implements Stringable, ConnectionInterface
      * @inheritDoc
      */
     public function send(
-        string $command,
+        string $event,
         mixed  $data,
         int    $opcode = 1,
         int    $flags = SWOOLE_WEBSOCKET_FLAG_FIN
@@ -33,7 +33,7 @@ class Connection implements Stringable, ConnectionInterface
             Server::get()->push(
                 fd: $this->fd,
                 data: (string)json_encode([
-                    'command' => $command,
+                    'event' => $event,
                     'data' => $data,
                     'time' => microtime(true)
                 ]),
