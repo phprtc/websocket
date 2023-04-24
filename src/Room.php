@@ -120,7 +120,7 @@ class Room extends Event
 
             $this->send(
                 event: 'room.leave',
-                message: $leaveMessage ?? sprintf('<i>%s</i> joined this chat', $connectionId),
+                message: $leaveMessage ?? sprintf('<i>%s</i> left this chat', $connectionId),
                 meta: ['user_sid' => $connectionId],
                 excludeIds: [$connectionId]
             );
