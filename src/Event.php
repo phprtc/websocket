@@ -45,4 +45,12 @@ class Event implements EventInterface
     {
         return $this->frame;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function eventIs(string $value): bool
+    {
+        return $value === $this->getEvent();
+    }
 }
