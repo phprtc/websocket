@@ -40,4 +40,12 @@ abstract class WebsocketHandler implements WebsocketHandlerInterface
 
         return null;
     }
+
+    /**
+     * @return Table
+     */
+    public function getConnections(): Table
+    {
+        return $this->connections;
+    }
 }
