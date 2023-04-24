@@ -8,6 +8,7 @@ use RTC\Contracts\Websocket\ConnectionInterface;
 use RTC\Server\Event;
 use RTC\Server\Server;
 use RTC\Websocket\Enums\RoomEventEnum;
+use RTC\Websocket\Enums\SenderType;
 use RTC\Websocket\Exceptions\RoomOverflowException;
 use Swoole\Table;
 
@@ -36,13 +37,18 @@ class Room extends Event
     /**
      * @throws RoomOverflowException
      */
-    public function add(int|ConnectionInterface $connection, array $metaData = []): static
+    public function add(
+        int|ConnectionInterface $connection,
+        array                   $metaData = [],
+        bool                    $notifyUsers = true,
+        ?string                 $joinedMessage = null,
+    ): static
     {
         if (-1 != $this->size && $this->connections->count() == $this->size) {
             throw new RoomOverflowException("The maximum size of $this->size for room $this->name has been reached.");
         }
 
-        $connectionId = $this->getClientId($connection);
+        $connectionId = $this->getConnectionId($connection);
         $this->connections->set(key: $connectionId, value: ['conn' => $connectionId]);
 
         // Save metadata(if any)
@@ -53,17 +59,36 @@ class Room extends Event
         // Fire client add event
         $this->emit(RoomEventEnum::ON_ADD->value, [$connection]);
 
+        // Notify room clients
+        if ($notifyUsers) {
+            $this->sendMessage(
+                senderType: SenderType::SYSTEM,
+                senderFd: null,
+                fd: intval($this->getConnectionId($connection)),
+                event: 'room.joined',
+                message: 'room joined successfully',
+                meta: ['user_sid' => $connectionId],
+            );
+
+            $this->send(
+                event: 'room.join',
+                message: $joinedMessage ?? sprintf('<i>%s</i> joined this chat', $metaData['user_name'] ?? $connectionId),
+                meta: ['user_sid' => $connectionId],
+                excludeIds: [$connectionId]
+            );
+        }
+
         return $this;
     }
 
     public function has(int|ConnectionInterface $connection): bool
     {
-        return $this->connections->exist($this->getClientId($connection));
+        return $this->connections->exist($this->getConnectionId($connection));
     }
 
     public function getMetaData(int|ConnectionInterface $connection): ?array
     {
-        return $this->connMetaData[$this->getClientId($connection)] ?? null;
+        return $this->connMetaData[$this->getConnectionId($connection)] ?? null;
     }
 
     public function count(): int
@@ -71,9 +96,9 @@ class Room extends Event
         return $this->connections->count();
     }
 
-    public function remove(int|ConnectionInterface $connection): void
+    public function remove(int|ConnectionInterface $connection, bool $notifyUsers = true, ?string $leaveMessage = null): void
     {
-        $connectionId = $this->getClientId($connection);
+        $connectionId = $this->getConnectionId($connection);
 
         if ($this->connections->exist($connectionId)) {
             $this->connections->del($connectionId);
@@ -81,12 +106,34 @@ class Room extends Event
 
         // Fire client remove event
         $this->emit(RoomEventEnum::ON_REMOVE->value, [$connection]);
+
+        // Notify room clients
+        if ($notifyUsers) {
+            $this->sendMessage(
+                senderType: SenderType::SYSTEM,
+                senderFd: null,
+                fd: intval($this->getConnectionId($connection)),
+                event: 'room.left',
+                message: 'room left successfully',
+                meta: ['user_sid' => $connectionId],
+            );
+
+            $this->send(
+                event: 'room.leave',
+                message: $leaveMessage ?? sprintf('<i>%s</i> joined this chat', $connectionId),
+                meta: ['user_sid' => $connectionId],
+                excludeIds: [$connectionId]
+            );
+        }
     }
 
     public function removeAll(): void
     {
-        $connections = clone $this->connections;
-        $this->connections->destroy();
+        $connections = $this->connections;
+
+        foreach ($connections as $connection) {
+            $this->remove($connection);
+        }
 
         $this->emit(RoomEventEnum::ON_REMOVE_ALL->value, [$connections]);
     }
@@ -100,25 +147,31 @@ class Room extends Event
      * @param string $event
      * @param mixed $message
      * @param array $meta
+     * @param array $excludeIds connection ids that will not receive this message
      * @return int Number of successful recipients
      */
-    public function send(string $event, mixed $message, array $meta = []): int
+    public function send(string $event, mixed $message, array $meta = [], array $excludeIds = []): int
     {
         // Fire message event
         $this->emit(RoomEventEnum::ON_MESSAGE->value, [$event, $message]);
 
+        $hasExcludableClients = [] != $excludeIds;
+
         foreach ($this->connections as $connectionData) {
-            Server::get()->push(
+            $connId = $connectionData['conn'];
+
+            // Skip excludable ids
+            if ($hasExcludableClients && in_array($connId, $excludeIds)) {
+                continue;
+            }
+
+            $this->sendMessage(
+                senderType: SenderType::SYSTEM,
+                senderFd: null,
                 fd: intval($connectionData['conn']),
-                data: strval(json_encode([
-                    'event' => $event,
-                    'meta' => $meta,
-                    'time' => microtime(true),
-                    'data' => [
-                        'sender_type' => "system",
-                        'message' => $message,
-                    ],
-                ])),
+                event: $event,
+                message: $message,
+                meta: $meta
             );
         }
 
@@ -140,26 +193,47 @@ class Room extends Event
         $this->emit(RoomEventEnum::ON_MESSAGE_ALL->value, [$event, $message, $this->connections]);
 
         foreach ($this->connections as $connectionData) {
-            Server::get()->push(
+            $this->sendMessage(
+                senderType: SenderType::USER,
+                senderFd: $connection->getIdentifier(),
                 fd: intval($connectionData['conn']),
-                data: strval(json_encode([
-                    'event' => $event,
-                    'meta' => $meta,
-                    'time' => microtime(true),
-                    'data' => [
-                        'sender_type' => 'user',
-                        'sender_sid' => $connection->getIdentifier(),
-                        'message' => $message,
-                    ],
-                ])),
+                event: $event,
+                message: $message,
+                meta: $meta
             );
         }
 
         return $this->connections->count();
     }
 
-    #[Pure] protected function getClientId(int|ConnectionInterface $connection): string
+    protected function sendMessage(SenderType $senderType, ?int $senderFd, int $fd, string $event, string $message, array $meta = []): void
+    {
+        Server::get()->push(
+            fd: $fd,
+            data: strval(json_encode([
+                'event' => $event,
+                'meta' => $meta,
+                'time' => microtime(true),
+                'data' => [
+                    'sender_type' => $senderType->getValue(),
+                    'sender_sid' => $senderFd,
+                    'message' => $message,
+                ],
+            ])),
+        );
+    }
+
+    #[Pure] protected function getConnectionId(int|ConnectionInterface $connection): string
     {
         return strval(is_int($connection) ? $connection : $connection->getIdentifier());
+    }
+
+    protected function getConnection(int|ConnectionInterface $connection): ConnectionInterface
+    {
+        if (is_int($connection)) {
+            return Server::get()->makeConnection($connection);
+        }
+
+        return $connection;
     }
 }
