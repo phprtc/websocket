@@ -99,9 +99,10 @@ class Room extends Event
     /**
      * @param string $event
      * @param mixed $message
+     * @param array $meta
      * @return int Number of successful recipients
      */
-    public function send(string $event, mixed $message): int
+    public function send(string $event, mixed $message, array $meta = []): int
     {
         // Fire message event
         $this->emit(RoomEventEnum::ON_MESSAGE->value, [$event, $message]);
@@ -111,6 +112,7 @@ class Room extends Event
                 fd: intval($connectionData['conn']),
                 data: strval(json_encode([
                     'event' => $event,
+                    'meta' => $meta,
                     'time' => microtime(true),
                     'data' => [
                         'sender_type' => "system",
@@ -123,7 +125,16 @@ class Room extends Event
         return $this->connections->count();
     }
 
-    public function sendAsClient(ConnectionInterface $connection, string $event, mixed $message): int
+    /**
+     * Send message as a client
+     *
+     * @param ConnectionInterface $connection
+     * @param string $event
+     * @param mixed $message
+     * @param array $meta
+     * @return int
+     */
+    public function sendAsClient(ConnectionInterface $connection, string $event, mixed $message, array $meta = []): int
     {
         // Fire message event
         $this->emit(RoomEventEnum::ON_MESSAGE_ALL->value, [$event, $message, $this->connections]);
@@ -133,6 +144,7 @@ class Room extends Event
                 fd: intval($connectionData['conn']),
                 data: strval(json_encode([
                     'event' => $event,
+                    'meta' => $meta,
                     'time' => microtime(true),
                     'data' => [
                         'sender_type' => 'user',
