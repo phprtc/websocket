@@ -126,7 +126,7 @@ class Room extends Event
     public function sendAsClient(ConnectionInterface $connection, string $event, mixed $message): int
     {
         // Fire message event
-        $this->emit(RoomEventEnum::ON_MESSAGE_ALL->value, [$event, $message, clone $this->connections]);
+        $this->emit(RoomEventEnum::ON_MESSAGE_ALL->value, [$event, $message, $this->connections]);
 
         foreach ($this->connections as $connectionData) {
             Server::get()->push(
