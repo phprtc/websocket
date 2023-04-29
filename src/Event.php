@@ -62,13 +62,8 @@ class Event implements EventInterface
         return $this->frame->getDecoded()['event'];
     }
 
-    public function intendedReceiverIs(string $value): bool
+    public function getReceiver(): string
     {
-        return $this->getIntendedReceiver() == $value;
-    }
-
-    public function getIntendedReceiver(): string
-    {
-        return $this->frame->getDecoded()['intended_receiver'];
+        return $this->frame->getDecoded()['receiver'];
     }
 }
