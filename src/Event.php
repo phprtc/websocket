@@ -25,6 +25,14 @@ class Event implements EventInterface
     /**
      * @inheritDoc
      */
+    public function getRoom(): ?string
+    {
+        return $this->frame->getDecoded()['room'] ?? null;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getEvent(): string
     {
         return $this->frame->getDecoded()['event'];
