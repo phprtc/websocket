@@ -80,7 +80,7 @@ class Room extends Event implements RoomInterface
 
             $this->send(
                 event: 'room.join',
-                message: $joinedMessage ?? sprintf('<i>%s</i> joined this chat', $metaData['user_name'] ?? $connectionId),
+                message: $joinedMessage ?? sprintf('<i>%s</i> joined this room', $metaData['user_name'] ?? $connectionId),
                 meta: ['user_sid' => $connectionId],
                 excludeIds: [$connectionId]
             );
@@ -128,7 +128,7 @@ class Room extends Event implements RoomInterface
 
             $this->send(
                 event: 'room.leave',
-                message: $leaveMessage ?? sprintf('<i>%s</i> left this chat', $connectionId),
+                message: $leaveMessage ?? sprintf('<i>%s</i> left this room', $connectionId),
                 meta: ['user_sid' => $connectionId],
                 excludeIds: [$connectionId]
             );
