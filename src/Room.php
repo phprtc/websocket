@@ -70,7 +70,7 @@ class Room extends Event implements RoomInterface
                 senderType: SenderType::SYSTEM,
                 senderFd: null,
                 fd: intval($this->getConnectionId($connection)),
-                event: 'room.joined',
+                event: 'joined',
                 message: 'room joined successfully',
                 meta: [
                     'room' => $this->name,
@@ -79,7 +79,7 @@ class Room extends Event implements RoomInterface
             );
 
             $this->send(
-                event: 'room.join',
+                event: 'join',
                 message: $joinedMessage ?? sprintf('<i>%s</i> joined this room', $metaData['user_name'] ?? $connectionId),
                 meta: ['user_sid' => $connectionId],
                 excludeIds: [$connectionId]
@@ -121,13 +121,13 @@ class Room extends Event implements RoomInterface
                 senderType: SenderType::SYSTEM,
                 senderFd: null,
                 fd: intval($this->getConnectionId($connection)),
-                event: 'room.left',
+                event: 'left',
                 message: 'room left successfully',
                 meta: ['user_sid' => $connectionId],
             );
 
             $this->send(
-                event: 'room.leave',
+                event: 'leave',
                 message: $leaveMessage ?? sprintf('<i>%s</i> left this room', $connectionId),
                 meta: ['user_sid' => $connectionId],
                 excludeIds: [$connectionId]
