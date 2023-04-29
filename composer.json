@@ -21,12 +21,6 @@
             "RTC\\Websocket\\Tests\\": "tests/"
         }
     },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://phprtc.repo.repman.io"
-        }
-    ],
     "scripts": {
         "analyse": "phpstan analyse",
         "test": "phpunit"
@@ -36,5 +30,8 @@
         "phpunit/phpunit": "^9.5",
         "openswoole/ide-helper": "^4.10",
         "jetbrains/phpstorm-attributes": "^1.0"
+    },
+    "config": {
+        "preferred-install": "dist"
     }
 }

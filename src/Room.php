@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace RTC\Websocket;
 
 use JetBrains\PhpStorm\Pure;
+use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
 use RTC\Server\Event;
 use RTC\Server\Server;
@@ -12,26 +13,29 @@ use RTC\Websocket\Enums\SenderType;
 use RTC\Websocket\Exceptions\RoomOverflowException;
 use Swoole\Table;
 
-class Room extends Event
+class Room extends Event implements RoomInt
 {
     private Table $connections;
     private array $connMetaData = [];
 
 
-    public static function create(string $name, int $size = -1): static
+    public static function create(ServerInterface $server, string $name, int $size = -1): static
     {
-        return new static($name, $size);
+        return new static($server, $name, $size);
     }
 
 
     public function __construct(
-        protected readonly string $name,
-        protected readonly int    $size = 1000_00
+        public readonly ServerInterface $server,
+        public readonly string          $name,
+        public readonly int             $size = 1000
     )
     {
         $this->connections = new Table($this->size);
         $this->connections->column('conn', Table::TYPE_STRING, 100);
         $this->connections->create();
+
+        $this->server->
     }
 
     /**
@@ -208,7 +212,7 @@ class Room extends Event
 
     protected function sendMessage(SenderType $senderType, ?int $senderFd, int $fd, string $event, string $message, array $meta = []): void
     {
-        Server::get()->push(
+        $this->server->push(
             fd: $fd,
             data: strval(json_encode([
                 'event' => $event,
