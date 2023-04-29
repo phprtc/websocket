@@ -72,7 +72,10 @@ class Room extends Event implements RoomInterface
                 fd: intval($this->getConnectionId($connection)),
                 event: 'room.joined',
                 message: 'room joined successfully',
-                meta: ['user_sid' => $connectionId],
+                meta: [
+                    'room' => $this->name,
+                    'user_sid' => $connectionId,
+                ],
             );
 
             $this->send(
