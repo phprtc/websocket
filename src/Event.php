@@ -33,14 +33,6 @@ class Event implements EventInterface
     /**
      * @inheritDoc
      */
-    public function getEvent(): string
-    {
-        return $this->frame->getDecoded()['event'];
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getTime(): string
     {
         return $this->frame->getDecoded()['time'];
@@ -60,5 +52,23 @@ class Event implements EventInterface
     public function eventIs(string $value): bool
     {
         return $value === $this->getEvent();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEvent(): string
+    {
+        return $this->frame->getDecoded()['event'];
+    }
+
+    public function intendedReceiverIs(string $value): bool
+    {
+        return $this->getIntendedReceiver() == $value;
+    }
+
+    public function getIntendedReceiver(): string
+    {
+        return $this->frame->getDecoded()['time'];
     }
 }
