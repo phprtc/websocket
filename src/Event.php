@@ -4,14 +4,17 @@ namespace RTC\Websocket;
 
 use RTC\Contracts\Websocket\EventInterface;
 use RTC\Contracts\Websocket\FrameInterface;
+use RTC\Contracts\Websocket\ReceiverInterface;
 
 class Event implements EventInterface
 {
+    protected readonly ReceiverInterface $receiver;
 
     public function __construct(
         protected FrameInterface $frame
     )
     {
+        $this->receiver = new Receiver($this->frame->getDecoded()['receiver']);
     }
 
     /**
@@ -62,8 +65,8 @@ class Event implements EventInterface
         return $this->frame->getDecoded()['event'];
     }
 
-    public function getReceiver(): string
+    public function getReceiver(): ReceiverInterface
     {
-        return $this->frame->getDecoded()['receiver'];
+        return $this->receiver;
     }
 }
