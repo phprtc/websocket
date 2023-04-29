@@ -69,6 +69,6 @@ class Event implements EventInterface
 
     public function getIntendedReceiver(): string
     {
-        return $this->frame->getDecoded()['time'];
+        return $this->frame->getDecoded()['intended_receiver'];
     }
 }
