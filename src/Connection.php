@@ -34,11 +34,7 @@ class Connection implements Stringable, ConnectionInterface
             Server::get()->sendWSMessage(
                 fd: $this->fd,
                 event: $event,
-                data: (string)json_encode([
-                    'event' => $event,
-                    'data' => $data,
-                    'time' => microtime(true)
-                ]),
+                data: $data,
                 receiverType: WSIntendedReceiver::CLIENT,
                 receiverId: strval($this->fd),
                 opcode: $opcode,
