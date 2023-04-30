@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace RTC\Websocket;
 
 use JetBrains\PhpStorm\Pure;
+use RTC\Contracts\Enums\WSIntendedReceiver;
 use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
 use RTC\Contracts\Websocket\RoomInterface;
@@ -28,8 +29,8 @@ class Room extends Event implements RoomInterface
 
     public function __construct(
         public readonly ServerInterface $server,
-        protected readonly string          $name,
-        protected readonly int             $size = 1000
+        protected readonly string       $name,
+        protected readonly int          $size = 1000
     )
     {
         $this->connections = new Table($this->size);
@@ -214,20 +215,26 @@ class Room extends Event implements RoomInterface
         return $this->connections->count();
     }
 
-    protected function sendMessage(SenderType $senderType, ?int $senderFd, int $fd, string $event, string $message, array $meta = []): void
+    protected function sendMessage(
+        SenderType $senderType,
+        ?int       $senderFd,
+        int        $fd,
+        string     $event,
+        string     $message,
+        array      $meta = []
+    ): void
     {
-        $this->server->push(
+        $this->server->sendWSMessage(
             fd: $fd,
-            data: strval(json_encode([
-                'event' => $event,
-                'meta' => $meta,
-                'time' => microtime(true),
-                'data' => [
-                    'sender_type' => $senderType->getValue(),
-                    'sender_sid' => $senderFd,
-                    'message' => $message,
-                ],
-            ])),
+            event: $event,
+            data: [
+                'sender_type' => $senderType->getValue(),
+                'sender_sid' => $senderFd,
+                'message' => $message,
+            ],
+            receiverType: WSIntendedReceiver::ROOM,
+            receiverId: $this->name,
+            meta: $meta,
         );
     }
 

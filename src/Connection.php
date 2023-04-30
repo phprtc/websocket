@@ -2,6 +2,7 @@
 
 namespace RTC\Websocket;
 
+use RTC\Contracts\Enums\WSIntendedReceiver;
 use RTC\Contracts\Websocket\ConnectionInterface;
 use RTC\Server\Server;
 use Stringable;
@@ -30,13 +31,16 @@ class Connection implements Stringable, ConnectionInterface
     ): void
     {
         if (Server::get()->exists($this->getIdentifier())) {
-            Server::get()->push(
+            Server::get()->sendWSMessage(
                 fd: $this->fd,
+                event: $event,
                 data: (string)json_encode([
                     'event' => $event,
                     'data' => $data,
                     'time' => microtime(true)
                 ]),
+                receiverType: WSIntendedReceiver::CLIENT,
+                receiverId: strval($this->fd),
                 opcode: $opcode,
                 flags: $flags,
             );
