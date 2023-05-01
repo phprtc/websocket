@@ -17,8 +17,8 @@ class Receiver implements ReceiverInterface
         return $this->data['type'];
     }
 
-    public function getName(): string
+    public function getId(): string
     {
-        return $this->data['name'];
+        return $this->data['id'];
     }
 }
