@@ -21,4 +21,9 @@ class Receiver implements ReceiverInterface
     {
         return $this->data['id'];
     }
+
+    public function isValid(): bool
+    {
+        return !array_key_exists('id', $this->data) || !array_key_exists('type', $this->data);
+    }
 }
