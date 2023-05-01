@@ -225,16 +225,10 @@ class Room extends Event implements RoomInterface
         array        $meta = []
     ): void
     {
-        $meta['user_info'] = $senderType == WSSenderType::USER
-            ? $this->server->getConnectionInfo(intval($senderId))
-            : null;
-
         $this->server->sendWSMessage(
             fd: $fd,
             event: $event,
-            data: [
-                'message' => $message,
-            ],
+            data: ['message' => $message,],
             senderType: $senderType,
             senderId: $senderId,
             receiverType: WSIntendedReceiver::ROOM,
