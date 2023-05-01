@@ -5,6 +5,7 @@ namespace RTC\Websocket;
 
 use JetBrains\PhpStorm\Pure;
 use RTC\Contracts\Enums\WSIntendedReceiver;
+use RTC\Contracts\Enums\WSRoomTerm;
 use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
 use RTC\Contracts\Websocket\RoomInterface;
@@ -71,7 +72,7 @@ class Room extends Event implements RoomInterface
                 senderType: SenderType::SYSTEM,
                 senderFd: null,
                 fd: intval($this->getConnectionId($connection)),
-                event: 'joined',
+                event: WSRoomTerm::JOINED->value,
                 message: 'room joined successfully',
                 meta: [
                     'room' => $this->name,
@@ -80,7 +81,7 @@ class Room extends Event implements RoomInterface
             );
 
             $this->send(
-                event: 'join',
+                event: WSRoomTerm::USER_JOINED->value,
                 message: $joinedMessage ?? sprintf('<i>%s</i> joined this room', $metaData['user_name'] ?? $connectionId),
                 meta: ['user_sid' => $connectionId],
                 excludeIds: [$connectionId]
@@ -122,13 +123,13 @@ class Room extends Event implements RoomInterface
                 senderType: SenderType::SYSTEM,
                 senderFd: null,
                 fd: intval($this->getConnectionId($connection)),
-                event: 'left',
+                event: WSRoomTerm::LEFT->value,
                 message: 'room left successfully',
                 meta: ['user_sid' => $connectionId],
             );
 
             $this->send(
-                event: 'leave',
+                event: WSRoomTerm::USER_LEFT->value,
                 message: $leaveMessage ?? sprintf('<i>%s</i> left this room', $connectionId),
                 meta: ['user_sid' => $connectionId],
                 excludeIds: [$connectionId]
