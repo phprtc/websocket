@@ -83,7 +83,7 @@ class Room extends Event implements RoomInterface
 
             $this->send(
                 event: WSRoomTerm::USER_JOINED->value,
-                message: $joinedMessage ?? sprintf('<i>%s</i> joined this room', $info['user_name'] ?? $connectionId),
+                message: $joinedMessage ?? sprintf('<i>#%s</i> joined this room', $info['user_name'] ?? $connectionId),
                 meta: [
                     'user_sid' => $connectionId,
                     'user_info' => $this->server->getConnectionInfo($connection),
@@ -137,7 +137,7 @@ class Room extends Event implements RoomInterface
 
             $this->send(
                 event: WSRoomTerm::USER_LEFT->value,
-                message: $leaveMessage ?? sprintf('<i>%s</i> left this room', $connectionId),
+                message: $leaveMessage ?? sprintf('<i>#%s</i> left this room', $connectionId),
                 meta: [
                     'user_sid' => $connectionId,
                     'user_info' => $this->server->getConnectionInfo($connection),
