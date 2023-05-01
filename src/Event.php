@@ -20,9 +20,9 @@ class Event implements EventInterface
     /**
      * @inheritDoc
      */
-    public function getMessage(): mixed
+    public function getData(): mixed
     {
-        return $this->frame->getDecoded()['message'] ?? null;
+        return $this->frame->getDecoded()['data'] ?? null;
     }
 
     /**
@@ -46,13 +46,13 @@ class Event implements EventInterface
      */
     public function eventIs(string $value): bool
     {
-        return $value === $this->getEvent();
+        return $value === $this->getName();
     }
 
     /**
      * @inheritDoc
      */
-    public function getEvent(): string
+    public function getName(): string
     {
         return $this->frame->getDecoded()['event'];
     }
