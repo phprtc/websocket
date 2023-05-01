@@ -21,6 +21,16 @@ class Connection implements Stringable, ConnectionInterface
         return strval($this->fd);
     }
 
+    public function attachInfo(string $info): static
+    {
+        Server::get()->attachConnectionInfo(
+            connection: $this->fd,
+            info: $info
+        );
+
+        return $this;
+    }
+
     /**
      * @inheritDoc
      */
