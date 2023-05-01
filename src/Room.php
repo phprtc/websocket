@@ -6,13 +6,13 @@ namespace RTC\Websocket;
 use JetBrains\PhpStorm\Pure;
 use RTC\Contracts\Enums\WSIntendedReceiver;
 use RTC\Contracts\Enums\WSRoomTerm;
+use RTC\Contracts\Enums\WSSenderType;
 use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
 use RTC\Contracts\Websocket\RoomInterface;
 use RTC\Server\Event;
 use RTC\Server\Server;
 use RTC\Websocket\Enums\RoomEventEnum;
-use RTC\Websocket\Enums\SenderType;
 use RTC\Websocket\Exceptions\RoomOverflowException;
 use Swoole\Table;
 
@@ -46,7 +46,7 @@ class Room extends Event implements RoomInterface
      */
     public function add(
         int|ConnectionInterface $connection,
-        array                   $metaData = [],
+        array                   $info = [],
         bool                    $notifyUsers = true,
         ?string                 $joinedMessage = null,
     ): static
@@ -59,8 +59,8 @@ class Room extends Event implements RoomInterface
         $this->connections->set(key: $connectionId, value: ['conn' => $connectionId]);
 
         // Save metadata(if any)
-        if ([] != $metaData) {
-            $this->connMetaData[$connectionId] = $metaData;
+        if ([] != $info) {
+            $this->connMetaData[$connectionId] = $info;
         }
 
         // Fire client add event
@@ -69,8 +69,8 @@ class Room extends Event implements RoomInterface
         // Notify room clients
         if ($notifyUsers) {
             $this->sendMessage(
-                senderType: SenderType::SYSTEM,
-                senderFd: null,
+                senderType: WSSenderType::SYSTEM,
+                senderId: WSSenderType::SYSTEM->value,
                 fd: intval($this->getConnectionId($connection)),
                 event: WSRoomTerm::JOINED->value,
                 message: 'room joined successfully',
@@ -82,7 +82,7 @@ class Room extends Event implements RoomInterface
 
             $this->send(
                 event: WSRoomTerm::USER_JOINED->value,
-                message: $joinedMessage ?? sprintf('<i>%s</i> joined this room', $metaData['user_name'] ?? $connectionId),
+                message: $joinedMessage ?? sprintf('<i>%s</i> joined this room', $info['user_name'] ?? $connectionId),
                 meta: ['user_sid' => $connectionId],
                 excludeIds: [$connectionId]
             );
@@ -120,8 +120,8 @@ class Room extends Event implements RoomInterface
         // Notify room clients
         if ($notifyUsers) {
             $this->sendMessage(
-                senderType: SenderType::SYSTEM,
-                senderFd: null,
+                senderType: WSSenderType::SYSTEM,
+                senderId: WSSenderType::SYSTEM->value,
                 fd: intval($this->getConnectionId($connection)),
                 event: WSRoomTerm::LEFT->value,
                 message: 'room left successfully',
@@ -176,8 +176,8 @@ class Room extends Event implements RoomInterface
             }
 
             $this->sendMessage(
-                senderType: SenderType::SYSTEM,
-                senderFd: null,
+                senderType: WSSenderType::SYSTEM,
+                senderId: WSSenderType::SYSTEM->value,
                 fd: intval($connectionData['conn']),
                 event: $event,
                 message: $message,
@@ -204,8 +204,8 @@ class Room extends Event implements RoomInterface
 
         foreach ($this->connections as $connectionData) {
             $this->sendMessage(
-                senderType: SenderType::USER,
-                senderFd: $connection->getIdentifier(),
+                senderType: WSSenderType::USER,
+                senderId: strval($connection->getIdentifier()),
                 fd: intval($connectionData['conn']),
                 event: $event,
                 message: $message,
@@ -217,22 +217,22 @@ class Room extends Event implements RoomInterface
     }
 
     protected function sendMessage(
-        SenderType $senderType,
-        ?int       $senderFd,
-        int        $fd,
-        string     $event,
-        string     $message,
-        array      $meta = []
+        WSSenderType $senderType,
+        string       $senderId,
+        int          $fd,
+        string       $event,
+        string       $message,
+        array        $meta = []
     ): void
     {
         $this->server->sendWSMessage(
             fd: $fd,
             event: $event,
             data: [
-                'sender_type' => $senderType->getValue(),
-                'sender_sid' => $senderFd,
                 'message' => $message,
             ],
+            senderType: $senderType,
+            senderId: $senderId,
             receiverType: WSIntendedReceiver::ROOM,
             receiverId: $this->name,
             meta: $meta,
