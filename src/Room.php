@@ -5,7 +5,7 @@ namespace RTC\Websocket;
 
 use JetBrains\PhpStorm\Pure;
 use RTC\Contracts\Enums\WSIntendedReceiver;
-use RTC\Contracts\Enums\WSRoomTerm;
+use RTC\Contracts\Enums\WSEvent;
 use RTC\Contracts\Enums\WSSenderType;
 use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
@@ -72,7 +72,7 @@ class Room extends Event implements RoomInterface
                 senderType: WSSenderType::SERVER,
                 senderId: WSSenderType::SERVER->value,
                 fd: intval($this->getConnectionId($connection)),
-                event: WSRoomTerm::JOINED->value,
+                event: WSEvent::JOINED->value,
                 message: 'room joined successfully',
                 meta: [
                     'room' => $this->name,
@@ -82,7 +82,7 @@ class Room extends Event implements RoomInterface
             );
 
             $this->send(
-                event: WSRoomTerm::USER_JOINED->value,
+                event: WSEvent::USER_JOINED->value,
                 message: $joinedMessage ?? sprintf('<i>#%s</i> joined this room', $info['user_name'] ?? $connectionId),
                 meta: [
                     'user_sid' => $connectionId,
@@ -127,7 +127,7 @@ class Room extends Event implements RoomInterface
                 senderType: WSSenderType::SERVER,
                 senderId: WSSenderType::SERVER->value,
                 fd: intval($this->getConnectionId($connection)),
-                event: WSRoomTerm::LEFT->value,
+                event: WSEvent::LEFT->value,
                 message: 'room left successfully',
                 meta: [
                     'user_sid' => $connectionId,
@@ -136,7 +136,7 @@ class Room extends Event implements RoomInterface
             );
 
             $this->send(
-                event: WSRoomTerm::USER_LEFT->value,
+                event: WSEvent::USER_LEFT->value,
                 message: $leaveMessage ?? sprintf('<i>#%s</i> left this room', $connectionId),
                 meta: [
                     'user_sid' => $connectionId,
