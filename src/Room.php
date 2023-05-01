@@ -69,8 +69,8 @@ class Room extends Event implements RoomInterface
         // Notify room clients
         if ($notifyUsers) {
             $this->sendMessage(
-                senderType: WSSenderType::SYSTEM,
-                senderId: WSSenderType::SYSTEM->value,
+                senderType: WSSenderType::SERVER,
+                senderId: WSSenderType::SERVER->value,
                 fd: intval($this->getConnectionId($connection)),
                 event: WSRoomTerm::JOINED->value,
                 message: 'room joined successfully',
@@ -120,8 +120,8 @@ class Room extends Event implements RoomInterface
         // Notify room clients
         if ($notifyUsers) {
             $this->sendMessage(
-                senderType: WSSenderType::SYSTEM,
-                senderId: WSSenderType::SYSTEM->value,
+                senderType: WSSenderType::SERVER,
+                senderId: WSSenderType::SERVER->value,
                 fd: intval($this->getConnectionId($connection)),
                 event: WSRoomTerm::LEFT->value,
                 message: 'room left successfully',
@@ -176,8 +176,8 @@ class Room extends Event implements RoomInterface
             }
 
             $this->sendMessage(
-                senderType: WSSenderType::SYSTEM,
-                senderId: WSSenderType::SYSTEM->value,
+                senderType: WSSenderType::SERVER,
+                senderId: WSSenderType::SERVER->value,
                 fd: intval($connectionData['conn']),
                 event: $event,
                 message: $message,
