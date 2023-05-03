@@ -37,6 +37,7 @@ class Connection implements Stringable, ConnectionInterface
     public function send(
         string       $event,
         mixed        $data,
+        array        $meta = [],
         WSSenderType $senderType = WSSenderType::SERVER,
         string       $senderId = 'system',
         int          $opcode = 1,
@@ -52,6 +53,7 @@ class Connection implements Stringable, ConnectionInterface
                 senderId: $senderId,
                 receiverType: WSIntendedReceiver::CLIENT,
                 receiverId: strval($this->fd),
+                meta: $meta,
                 opcode: $opcode,
                 flags: $flags,
             );
