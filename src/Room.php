@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace RTC\Websocket;
 
+use HttpStatusCodes\StatusCode;
 use JetBrains\PhpStorm\Pure;
-use RTC\Contracts\Enums\WSIntendedReceiver;
 use RTC\Contracts\Enums\WSEvent;
+use RTC\Contracts\Enums\WSIntendedReceiver;
 use RTC\Contracts\Enums\WSSenderType;
 use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
@@ -168,9 +169,16 @@ class Room extends Event implements RoomInterface
      * @param mixed $message
      * @param array $meta
      * @param array $excludeIds connection ids that will not receive this message
+     * @param StatusCode $status
      * @return int Number of successful recipients
      */
-    public function send(string $event, mixed $message, array $meta = [], array $excludeIds = []): int
+    public function send(
+        string     $event,
+        mixed      $message,
+        array      $meta = [],
+        array      $excludeIds = [],
+        StatusCode $status = StatusCode::OK,
+    ): int
     {
         // Fire message event
         $this->emit(RoomEventEnum::ON_MESSAGE->value, [$event, $message]);
@@ -232,7 +240,8 @@ class Room extends Event implements RoomInterface
         int          $fd,
         string       $event,
         string       $message,
-        array        $meta = []
+        array        $meta = [],
+        StatusCode   $status = StatusCode::OK,
     ): void
     {
         $this->server->sendWSMessage(
@@ -244,6 +253,7 @@ class Room extends Event implements RoomInterface
             receiverType: WSIntendedReceiver::ROOM,
             receiverId: $this->name,
             meta: $meta,
+            status: $status,
         );
     }
 
