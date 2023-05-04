@@ -2,6 +2,7 @@
 
 namespace RTC\Websocket;
 
+use HttpStatusCodes\StatusCode;
 use RTC\Contracts\Enums\WSIntendedReceiver;
 use RTC\Contracts\Enums\WSSenderType;
 use RTC\Contracts\Websocket\ConnectionInterface;
@@ -40,6 +41,7 @@ class Connection implements Stringable, ConnectionInterface
         array        $meta = [],
         WSSenderType $senderType = WSSenderType::SERVER,
         string       $senderId = 'system',
+        StatusCode   $status = StatusCode::OK,
         int          $opcode = 1,
         int          $flags = SWOOLE_WEBSOCKET_FLAG_FIN
     ): void
@@ -54,6 +56,7 @@ class Connection implements Stringable, ConnectionInterface
                 receiverType: WSIntendedReceiver::CLIENT,
                 receiverId: strval($this->fd),
                 meta: $meta,
+                status: $status,
                 opcode: $opcode,
                 flags: $flags,
             );

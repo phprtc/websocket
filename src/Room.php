@@ -213,9 +213,16 @@ class Room extends Event implements RoomInterface
      * @param string $event
      * @param mixed $message
      * @param array $meta
+     * @param StatusCode $status
      * @return int
      */
-    public function sendAsClient(ConnectionInterface $connection, string $event, mixed $message, array $meta = []): int
+    public function sendAsClient(
+        ConnectionInterface $connection,
+        string              $event,
+        mixed               $message,
+        array               $meta = [],
+        StatusCode          $status = StatusCode::OK,
+    ): int
     {
         // Fire message event
         $this->emit(RoomEventEnum::ON_MESSAGE_ALL->value, [$event, $message, $this->connections]);
@@ -227,7 +234,8 @@ class Room extends Event implements RoomInterface
                 fd: intval($connectionData['conn']),
                 event: $event,
                 message: $message,
-                meta: $meta
+                meta: $meta,
+                status: $status
             );
         }
 
