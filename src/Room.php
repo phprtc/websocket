@@ -117,34 +117,34 @@ class Room extends Event implements RoomInterface
 
         if ($this->connections->exist($connectionId)) {
             $this->connections->del($connectionId);
-        }
 
-        // Fire client remove event
-        $this->emit(RoomEventEnum::ON_REMOVE->value, [$connection]);
+            // Fire client remove event
+            $this->emit(RoomEventEnum::ON_REMOVE->value, [$connection]);
 
-        // Notify room clients
-        if ($notifyUsers) {
-            $this->sendMessage(
-                senderType: WSSenderType::SERVER,
-                senderId: WSSenderType::SERVER->value,
-                fd: intval($this->getConnectionId($connection)),
-                event: WSEvent::LEFT->value,
-                message: 'room left successfully',
-                meta: [
-                    'user_sid' => $connectionId,
-                    'user_info' => $this->server->getConnectionInfo($connection),
-                ],
-            );
+            // Notify room clients
+            if ($notifyUsers) {
+                $this->sendMessage(
+                    senderType: WSSenderType::SERVER,
+                    senderId: WSSenderType::SERVER->value,
+                    fd: intval($this->getConnectionId($connection)),
+                    event: WSEvent::LEFT->value,
+                    message: 'room left successfully',
+                    meta: [
+                        'user_sid' => $connectionId,
+                        'user_info' => $this->server->getConnectionInfo($connection),
+                    ],
+                );
 
-            $this->send(
-                event: WSEvent::USER_LEFT->value,
-                message: $leaveMessage ?? sprintf('<i>#%s</i> left this room', $connectionId),
-                meta: [
-                    'user_sid' => $connectionId,
-                    'user_info' => $this->server->getConnectionInfo($connection),
-                ],
-                excludeIds: [$connectionId]
-            );
+                $this->send(
+                    event: WSEvent::USER_LEFT->value,
+                    message: $leaveMessage ?? sprintf('<i>#%s</i> left this room', $connectionId),
+                    meta: [
+                        'user_sid' => $connectionId,
+                        'user_info' => $this->server->getConnectionInfo($connection),
+                    ],
+                    excludeIds: [$connectionId]
+                );
+            }
         }
     }
 
