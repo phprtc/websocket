@@ -73,7 +73,7 @@ class Room extends Event implements RoomInterface
                 senderType: WSSenderType::SERVER,
                 senderId: WSSenderType::SERVER->value,
                 fd: intval($this->getConnectionId($connection)),
-                event: WSEvent::JOINED->value,
+                event: WSEvent::ROOM_JOINED->value,
                 message: 'room joined successfully',
                 meta: [
                     'room' => $this->name,
@@ -127,7 +127,7 @@ class Room extends Event implements RoomInterface
                     senderType: WSSenderType::SERVER,
                     senderId: WSSenderType::SERVER->value,
                     fd: intval($this->getConnectionId($connection)),
-                    event: WSEvent::LEFT->value,
+                    event: WSEvent::ROOM_LEFT->value,
                     message: 'room left successfully',
                     meta: [
                         'user_sid' => $connectionId,
