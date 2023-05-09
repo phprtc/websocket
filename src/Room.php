@@ -279,6 +279,25 @@ class Room extends Event implements RoomInterface
         return $connection;
     }
 
+    public function listConnections(bool $withInfo = true): array
+    {
+        $connections = [];
+
+        if (!$withInfo) {
+            foreach ($this->connections as $connectionData) {
+                $connections[] = $connectionData['conn'];
+            }
+
+            return $connections;
+        }
+
+        foreach ($this->connections as $connectionData) {
+            $connections[$connectionData['conn']] = Server::get()->getConnectionInfo(intval($connectionData['conn']));
+        }
+
+        return $connections;
+    }
+
     public function getName(): string
     {
         return $this->name;
