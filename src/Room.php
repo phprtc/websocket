@@ -20,7 +20,6 @@ use Swoole\Table;
 class Room extends Event implements RoomInterface
 {
     private Table $connections;
-    private array $connMetaData = [];
 
 
     public static function create(ServerInterface $server, string $name, int $size = -1): static
@@ -47,7 +46,6 @@ class Room extends Event implements RoomInterface
      */
     public function add(
         int|ConnectionInterface $connection,
-        array                   $info = [],
         bool                    $notifyUsers = true,
         ?string                 $joinedMessage = null,
     ): static
@@ -58,11 +56,6 @@ class Room extends Event implements RoomInterface
 
         $connectionId = $this->getConnectionId($connection);
         $this->connections->set(key: $connectionId, value: ['conn' => $connectionId]);
-
-        // Save metadata(if any)
-        if ([] != $info) {
-            $this->connMetaData[$connectionId] = $info;
-        }
 
         // Fire client add event
         $this->emit(RoomEventEnum::ON_ADD->value, [$connection]);
@@ -99,11 +92,6 @@ class Room extends Event implements RoomInterface
     public function has(int|ConnectionInterface $connection): bool
     {
         return $this->connections->exist($this->getConnectionId($connection));
-    }
-
-    public function getMetaData(int|ConnectionInterface $connection): ?array
-    {
-        return $this->connMetaData[$this->getConnectionId($connection)] ?? null;
     }
 
     public function count(): int
@@ -247,7 +235,7 @@ class Room extends Event implements RoomInterface
         string       $senderId,
         int          $fd,
         string       $event,
-        string       $message,
+        mixed        $message,
         array        $meta = [],
         StatusCode   $status = StatusCode::OK,
     ): void
@@ -255,7 +243,7 @@ class Room extends Event implements RoomInterface
         $this->server->sendWSMessage(
             fd: $fd,
             event: $event,
-            data: ['message' => $message,],
+            data: ['message' => $message],
             senderType: $senderType,
             senderId: $senderId,
             receiverType: WSIntendedReceiver::ROOM,
