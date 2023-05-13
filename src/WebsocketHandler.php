@@ -4,6 +4,8 @@ namespace RTC\Websocket;
 
 use RTC\Contracts\Server\ServerInterface;
 use RTC\Contracts\Websocket\ConnectionInterface;
+use RTC\Contracts\Websocket\EventInterface;
+use RTC\Contracts\Websocket\RoomInterface;
 use RTC\Contracts\Websocket\WebsocketHandlerInterface;
 use Swoole\Table;
 
@@ -24,6 +26,16 @@ abstract class WebsocketHandler implements WebsocketHandlerInterface
 
     public function onReady(): void
     {
+    }
+
+    public function forwardRoomMessage(RoomInterface $room, ConnectionInterface $connection, EventInterface $event): void
+    {
+        $room->sendAsClient(
+            connection: $connection,
+            event: $event->getName(),
+            message: $event->getData(),
+            isForwarding: true
+        );
     }
 
     public function addConnection(ConnectionInterface $connection): void
