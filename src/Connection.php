@@ -47,9 +47,7 @@ class Connection implements Stringable, ConnectionInterface
         bool         $isForwarding = false,
     ): void
     {
-        if ($isForwarding) {
-            $meta['is_forwarded'] = $isForwarding;
-        }
+        $meta['is_forwarded'] = $isForwarding;
 
         if (Server::get()->exists($this->getIdentifier())) {
             Server::get()->sendWSMessage(

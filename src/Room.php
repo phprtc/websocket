@@ -244,9 +244,7 @@ class Room extends Event implements RoomInterface
         bool         $isForwarding = false,
     ): void
     {
-        if ($isForwarding) {
-            $meta['is_forwarded'] = $isForwarding;
-        }
+        $meta['is_forwarded'] = $isForwarding;
 
         $this->server->sendWSMessage(
             fd: $fd,
