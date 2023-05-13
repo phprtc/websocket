@@ -202,6 +202,7 @@ class Room extends Event implements RoomInterface
      * @param mixed $message
      * @param array $meta
      * @param StatusCode $status
+     * @param bool $isForwarding
      * @return int
      */
     public function sendAsClient(
@@ -210,6 +211,7 @@ class Room extends Event implements RoomInterface
         mixed               $message,
         array               $meta = [],
         StatusCode          $status = StatusCode::OK,
+        bool                $isForwarding = false,
     ): int
     {
         // Fire message event
@@ -223,7 +225,8 @@ class Room extends Event implements RoomInterface
                 event: $event,
                 message: $message,
                 meta: $meta,
-                status: $status
+                status: $status,
+                isForwarding: $isForwarding
             );
         }
 
@@ -238,12 +241,19 @@ class Room extends Event implements RoomInterface
         mixed        $message,
         array        $meta = [],
         StatusCode   $status = StatusCode::OK,
+        bool         $isForwarding = false,
     ): void
     {
+        if ($isForwarding) {
+            $meta['is_forwarded'] = $isForwarding;
+        }
+
         $this->server->sendWSMessage(
             fd: $fd,
             event: $event,
-            data: ['message' => $message],
+            data: $isForwarding
+                ? $message
+                : ['message' => $message],
             senderType: $senderType,
             senderId: $senderId,
             receiverType: WSIntendedReceiver::ROOM,

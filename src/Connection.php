@@ -43,9 +43,14 @@ class Connection implements Stringable, ConnectionInterface
         string       $senderId = 'system',
         StatusCode   $status = StatusCode::OK,
         int          $opcode = 1,
-        int          $flags = SWOOLE_WEBSOCKET_FLAG_FIN
+        int          $flags = SWOOLE_WEBSOCKET_FLAG_FIN,
+        bool         $isForwarding = false,
     ): void
     {
+        if ($isForwarding) {
+            $meta['is_forwarded'] = $isForwarding;
+        }
+
         if (Server::get()->exists($this->getIdentifier())) {
             Server::get()->sendWSMessage(
                 fd: $this->fd,
