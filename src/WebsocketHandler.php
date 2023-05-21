@@ -11,7 +11,19 @@ use Swoole\Table;
 
 abstract class WebsocketHandler implements WebsocketHandlerInterface
 {
+    /**
+     * Holds list of connections in this room
+     *
+     * @var Table
+     */
     private Table $connections;
+
+    /**
+     * Events added here will not be rejected
+     *
+     * @var array
+     */
+    protected array $whitelistEvents = [];
 
 
     public function __construct(
@@ -73,5 +85,13 @@ abstract class WebsocketHandler implements WebsocketHandlerInterface
     public function getConnectionIds(): Table
     {
         return $this->connections;
+    }
+
+    /**
+     * @return array
+     */
+    public function getWhitelistEvents(): array
+    {
+        return $this->whitelistEvents;
     }
 }
