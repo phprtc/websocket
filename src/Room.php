@@ -38,7 +38,7 @@ class Room extends Event implements RoomInterface
         $this->connections->column('conn', Table::TYPE_STRING, 100);
         $this->connections->create();
 
-//        $this->server->
+        $this->server->attachRoom($this);
     }
 
     /**
