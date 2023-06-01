@@ -158,6 +158,7 @@ class Room extends Event implements RoomInterface
      * @param array $meta
      * @param array $excludeIds connection ids that will not receive this message
      * @param StatusCode $status
+     * @param bool $isForwarding
      * @return int Number of successful recipients
      */
     public function send(
@@ -166,6 +167,7 @@ class Room extends Event implements RoomInterface
         array      $meta = [],
         array      $excludeIds = [],
         StatusCode $status = StatusCode::OK,
+        bool       $isForwarding = false,
     ): int
     {
         // Fire message event
@@ -187,7 +189,9 @@ class Room extends Event implements RoomInterface
                 fd: intval($connectionData['conn']),
                 event: $event,
                 message: $message,
-                meta: $meta
+                meta: $meta,
+                status: $status,
+                isForwarding: $isForwarding
             );
         }
 
